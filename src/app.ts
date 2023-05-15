@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 showHello('greeting', 'TypeScript');
 
 function showHello(divName: string, name: string) {
@@ -83,13 +84,13 @@ function getAllBooks2(): ReadonlyArray<Book> {
 
 // Book[], any[], unknown[]
 // void, undefined
-function logFirstAvailable(books: readonly Book[]): void {
+function logFirstAvailable(books: readonly Book[] = getAllBooks()): void {
     console.log(`Number of books: ${books.length}`);
     const title = books.find(({ available }) => available).title;
     console.log(`First available book: ${title}`);
 }
 
-function getBookTitlesByCategory(categoryFilter: Category): string[] {
+function getBookTitlesByCategory(categoryFilter: Category = Category.JavaScript): string[] {
     const books = getAllBooks();
 
     const filteredBooks = books.filter(({ category }) => category === categoryFilter).map(({ title }) => title);
@@ -121,6 +122,60 @@ function culcTotalPages(): bigint {
     }, 0n);
 }
 
+function createCustomer(name: string, age?: number, city?: string): void {
+    console.log(`Customer name: ${name}`);
+    age && console.log(`Customer age: ${age}`);
+    city && console.log(`Customer city: ${city}`);
+}
+
+function getBookById(id: number): Book {
+    const books = getAllBooks();
+    return books.find(({ id: propId }) => propId === id);
+}
+
+function checkoutBooks(customer: string, ...bookIds: number[]): string[] {
+    console.log(`Customer: ${customer}`);
+
+    return bookIds
+        .map(id => getBookById(id))
+        .filter(book => book.available)
+        .map(book => book.title);
+}
+
+function getTitles(author: string): string[];
+function getTitles(available: boolean): string[];
+function getTitles(id: number, available: boolean): string[];
+function getTitles(...args: [string | boolean] | [number, boolean]): string[] {
+    const books = getAllBooks();
+    if (args.length === 1) {
+        const [arg] = args;
+        if (typeof arg === 'string') {
+            return books.filter(book => book.author === arg).map(book => book.title);
+        } else if (typeof arg === 'boolean') {
+            return books.filter(book => book.available === arg).map(book => book.title);
+        }
+    } else if (args.length === 2) {
+        const [id, available] = args;
+
+        if (typeof id === 'number' && typeof available === 'boolean') {
+            return books.filter(book => book.id === id && book.available === available).map(book => book.title);
+        }
+    } else {
+        return [];
+    }
+}
+
+function assertStringValue(value: any): asserts value is string {
+    if (typeof value !== 'string') {
+        throw new Error('value must be a string');
+    }
+}
+
+function bookTitleTransform(title: any) {
+    assertStringValue(title);
+    return [...title].reverse().join('');
+}
+
 // interface TOptions {
 //     id: number;
 //     title: string;
@@ -141,9 +196,9 @@ function culcTotalPages(): bigint {
 
 // }
 
-function createCustomerId(name: string, id: number): string {
-    return `${id}/${name}`;
-}
+// function createCustomerId(name: string, id: number): string {
+//     return `${id}/${name}`;
+// }
 
 // Task 02.01
 // logFirstAvailable(getAllBooks());
@@ -166,3 +221,23 @@ function createCustomerId(name: string, id: number): string {
 // idGenerator = createCustomerId;
 // idGenerator = createCustomerId;
 // console.log(idGenerator('Anna', 2));
+
+// Task 03&02
+
+// createCustomer('Andy');
+// createCustomer('Andy', 30);
+// createCustomer('Andy', undefined, 'Kyiv');
+// createCustomer('Andy', 30, 'Kyiv');
+
+// console.log(getBookTitlesByCategory());
+// logFirstAvailable();
+// console.log(getBookById(1));
+// console.log(checkoutBooks('Anna', 1, 2, 4));
+
+// Task 03.03
+// const checkedoutBooks = getTitles(3, true);
+// console.log(checkedoutBooks);
+
+// Task 03.04
+console.log(bookTitleTransform('TS'));
+console.log(bookTitleTransform(123));
